@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Portfolio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<section class="hero">
+  <h1>"Build. Learn. Repeat."</h1>
+</section>
+
+<section id="about">
+  <h2>About Me</h2>
+  <p>I am a passionate developer building modern web apps.</p>
+</section>
+
+<section id="skills">
+  <h2>Skills</h2>
+  <ul>
+    <li>HTML</li>
+    <li>CSS</li>
+    <li>Python</li>
+    <li>Flask</li>
+    <li>MySQL</li>
+  </ul>
+</section>
+
+<section id="contact">
+  <h2>Contact Me</h2>
+  <form id="contactForm">
+    <input type="text" placeholder="Name" id="name" required>
+    <input type="email" placeholder="Email" id="email" required>
+    <textarea placeholder="Message" id="message" required></textarea>
+    <button type="submit">Send</button>
+  </form>
+</section>
+
+<script>
+document.getElementById('contactForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const data = {
+    name: document.getElementById('name').value,
+    email: document.getElementById('email').value,
+    message: document.getElementById('message').value
+  };
+
+  const res = await fetch('http://localhost:5000/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+  alert(result.message);
+});
+</script>
+
+</body>
+</html>
