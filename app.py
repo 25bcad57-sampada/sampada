@@ -1,12 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import mysql.connector
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.')
 CORS(app)
 
-# Railway MySQL connection
 conn = mysql.connector.connect(
     host=os.getenv("MYSQLHOST"),
     user=os.getenv("MYSQLUSER"),
@@ -17,22 +16,18 @@ conn = mysql.connector.connect(
 
 cursor = conn.cursor()
 
+# Serve frontend
 @app.route('/')
-def home():
-    return "Portfolio Backend Running"
+def serve_home():
+    return send_from_directory('.', 'index.html')
 
 @app.route('/contact', methods=['POST'])
 def contact():
     data = request.json
-    name = data['name']
-    email = data['email']
-    message = data['message']
-
     sql = "INSERT INTO contacts (name, email, message) VALUES (%s, %s, %s)"
-    cursor.execute(sql, (name, email, message))
+    cursor.execute(sql, (data['name'], data['email'], data['message']))
     conn.commit()
-
-    return jsonify({"message": "Saved successfully"})
+    return jsonify({"message": "Message sent successfully!"})
 
 if __name__ == '__main__':
     app.run(debug=True)
