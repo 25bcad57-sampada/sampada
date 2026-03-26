@@ -18,25 +18,31 @@ conn = mysql.connector.connect(
 cursor = conn.cursor()
 
 # ================= SERVE HTML =================
-@app.route('/')
+@app.route("/")
 def home():
-    return send_from_directory('static', 'index.html')
+    return render_template("index.html")
 
-# ================= STATIC FILES =================
-@app.route('/<path:path>')
-def static_files(path):
-    return send_from_directory('static', path)
-
-# ================= CONTACT =================
-@app.route('/contact', methods=['POST'])
+@app.route("/contact", methods=["POST"])
 def contact():
-    data = request.json
-    sql = "INSERT INTO contacts (name, email, message) VALUES (%s, %s, %s)"
-    cursor.execute(sql, (data['name'], data['email'], data['message']))
-    conn.commit()
-    return jsonify({"message": "Message sent successfully!"})
+    print("🔥 ROUTE HIT")   # MUST PRINT
 
-# ================= RUN =================
+    try:
+        data = request.get_json()
+        print("DATA:", data)
+
+        cursor.execute(
+            "INSERT INTO contacts (name, email, message) VALUES (%s, %s, %s)",
+            (data["name"], data["email"], data["message"])
+        )
+        db.commit()
+
+        print("✅ INSERTED")
+
+        return jsonify({"message": "Saved successfully!"})
+
+    except Exception as e:
+        print("❌ ERROR:", e)
+        return jsonify({"message": "Error"})
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
