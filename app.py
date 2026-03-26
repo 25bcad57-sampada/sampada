@@ -5,12 +5,12 @@ import os
 
 app = Flask(__name__)
 
-db = mysql.connector.connect(
-    host=os.environ.get("DB_HOST"),
-    port=int(os.environ.get("DB_PORT")),
-    user=os.environ.get("DB_USER"),
-    password=os.environ.get("DB_PASSWORD"),
-    database=os.environ.get("DB_NAME")
+conn = mysql.connector.connect(
+    host=os.getenv("MYSQLHOST"),
+    user=os.getenv("MYSQLUSER"),
+    password=os.getenv("MYSQLPASSWORD"),
+    database=os.getenv("MYSQLDATABASE"),
+    port=int(os.getenv("MYSQLPORT", 3306))  # ✅ FIX
 )
 
 cursor = db.cursor()
@@ -34,4 +34,5 @@ def contact():
     return redirect('/')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
