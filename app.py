@@ -3,58 +3,40 @@ from flask_cors import CORS
 import mysql.connector
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 CORS(app)
 
-# ================= DATABASE CONNECTION =================
-try:
-    conn = mysql.connector.connect(
-        host=os.getenv("MYSQLHOST"),
-        user=os.getenv("MYSQLUSER"),
-        password=os.getenv("MYSQLPASSWORD"),
-        database=os.getenv("MYSQLDATABASE"),
-        port=int(os.getenv("MYSQLPORT", 3306))
-    )
-    cursor = conn.cursor()
-    print("✅ MySQL Connected Successfully")
-except Exception as e:
-    print("❌ MySQL Connection Failed:", e)
+# ================= DATABASE =================
+conn = mysql.connector.connect(
+    host=os.getenv("MYSQLHOST"),
+    user=os.getenv("MYSQLUSER"),
+    password=os.getenv("MYSQLPASSWORD"),
+    database=os.getenv("MYSQLDATABASE"),
+    port=int(os.getenv("MYSQLPORT", 3306))
+)
 
-# ================= SERVE FRONTEND =================
+cursor = conn.cursor()
+
+# ================= SERVE HTML =================
 @app.route('/')
 def home():
-    return send_from_directory('.', 'index.html')
+    return send_from_directory('static', 'index.html')
 
-# Serve CSS, images, JS automatically
+# ================= STATIC FILES =================
 @app.route('/<path:path>')
 def static_files(path):
-    return send_from_directory('.', path)
+    return send_from_directory('static', path)
 
-# ================= CONTACT FORM =================
+# ================= CONTACT =================
 @app.route('/contact', methods=['POST'])
 def contact():
-    try:
-        data = request.json
+    data = request.json
+    sql = "INSERT INTO contacts (name, email, message) VALUES (%s, %s, %s)"
+    cursor.execute(sql, (data['name'], data['email'], data['message']))
+    conn.commit()
+    return jsonify({"message": "Message sent successfully!"})
 
-        name = data.get('name')
-        email = data.get('email')
-        message = data.get('message')
-
-        sql = "INSERT INTO contacts (name, email, message) VALUES (%s, %s, %s)"
-        cursor.execute(sql, (name, email, message))
-        conn.commit()
-
-        return jsonify({"message": "Message sent successfully!"})
-
-    except Exception as e:
-        return jsonify({"message": str(e)})
-
-# ================= TEST ROUTE =================
-@app.route('/test')
-def test():
-    return "Server is working ✅"
-
-# ================= RUN (RENDER FIX) =================
+# ================= RUN =================
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Render provides PORT
+    port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
