@@ -1,46 +1,36 @@
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
+from flask import Flask, render_template, request, redirect
 import mysql.connector
 import os
 
 app = Flask(__name__)
-CORS(app)
 
-# MySQL (safe connect)
-try:
-    conn = mysql.connector.connect(
-        host=os.getenv("MYSQLHOST"),
-        user=os.getenv("MYSQLUSER"),
-        password=os.getenv("MYSQLPASSWORD"),
-        database=os.getenv("MYSQLDATABASE"),
-        port=os.getenv("MYSQLPORT")
-    )
-    cursor = conn.cursor()
-    print("MySQL Connected")
-except:
-    print("MySQL connection failed")
+db = mysql.connector.connect(
+    host=os.environ.get("DB_HOST"),
+    port=int(os.environ.get("DB_PORT")),
+    user=os.environ.get("DB_USER"),
+    password=os.environ.get("DB_PASSWORD"),
+    database=os.environ.get("DB_NAME")
+)
 
-# ✅ SERVE HTML
+cursor = db.cursor()
+
 @app.route('/')
 def home():
-    return send_from_directory('.', 'index.html')
+    return render_template("index.html")
 
-# ✅ SERVE STATIC FILES (CSS + IMAGE automatically)
-@app.route('/<path:path>')
-def static_files(path):
-    return send_from_directory('.', path)
-
-# ✅ CONTACT API
 @app.route('/contact', methods=['POST'])
 def contact():
-    try:
-        data = request.json
-        sql = "INSERT INTO contacts (name, email, message) VALUES (%s, %s, %s)"
-        cursor.execute(sql, (data['name'], data['email'], data['message']))
-        conn.commit()
-        return jsonify({"message": "Message sent successfully!"})
-    except Exception as e:
-        return jsonify({"message": str(e)})
+    name = request.form['name']
+    email = request.form['email']
+    message = request.form['message']
 
-if __name__ == '__main__':
+    cursor.execute(
+        "INSERT INTO contacts (name, email, message) VALUES (%s, %s, %s)",
+        (name, email, message)
+    )
+    db.commit()
+
+    return redirect('/')
+
+if __name__ == "__main__":
     app.run(debug=True)
