@@ -2,64 +2,48 @@
 <html>
 <head>
   <title>My Portfolio</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
+<!-- HERO -->
 <section class="hero">
-
-  <!-- PROFILE IMAGE -->
-  <img src="profile.jpg" alt="My Photo" class="profile-img">
+  <img src="{{ url_for('static', filename='profile.jpg') }}" class="profile-img">
 
   <h1>"Code. Create. Inspire."</h1>
   <h2>I am <span>Sampada Laheri</span></h2>
-  <p>Aspiring Web Developer & Designer</p>
+  <p>BCA Student ,Web Developer ,Designer</p>
 </section>
 
-<section class="about">
+<!-- ABOUT -->
+<section>
   <h2>About Me</h2>
   <p>
-    I am a first-year BCA student at Kristu Jayanti University with a strong passion for coding and web design. 
-    I enjoy building modern websites and continuously improving my skills. 
-    I am adaptable, quick to learn, and passionate about becoming a professional developer.
+    I am a first-year BCA student at Kristu Jayanti University passionate about coding and web design.
+    I am adaptable, creative, and always eager to learn new technologies.
   </p>
 </section>
 
-<section class="skills">
+<!-- SKILLS -->
+<section>
   <h2>Skills</h2>
   <ul>
     <li>HTML & CSS</li>
     <li>JavaScript</li>
     <li>Python & Flask</li>
     <li>MySQL</li>
-    <li>Responsive Web Design</li>
     <li>Problem Solving</li>
-    <li>Adaptability</li>
   </ul>
 </section>
 
-<section class="certifications">
-  <h2>Certifications</h2>
-  <ul>
-    <li>CSS Certification</li>
-    <li>JavaScript Certification</li>
-    <li>Web Development Certification</li>
-  </ul>
-</section>
-
-<section class="hobbies">
-  <h2>Hobbies</h2>
-  <p>
-    Coding, Designing websites, Exploring new technologies, UI/UX design, Learning modern web trends
-  </p>
-</section>
-
-<section class="contact">
+<!-- CONTACT -->
+<section class="contact-section">
   <h2>Contact Me</h2>
-  <form id="contactForm">
-    <input type="text" placeholder="Name" id="name" required>
-    <input type="email" placeholder="Email" id="email" required>
-    <textarea placeholder="Message" id="message" required></textarea>
+
+  <form id="contactForm" class="contact-box">
+    <input type="text" id="name" placeholder="Your Name" required>
+    <input type="email" id="email" placeholder="Your Email" required>
+    <textarea id="message" placeholder="Your Message" required></textarea>
     <button type="submit">Send Message</button>
   </form>
 </section>
@@ -68,16 +52,14 @@
 document.getElementById('contactForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const data = {
-    name: document.getElementById('name').value,
-    email: document.getElementById('email').value,
-    message: document.getElementById('message').value
-  };
-
-  const res = await fetch('http://localhost:5000/contact', {
+  const res = await fetch('/contact', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
+    body: JSON.stringify({
+      name: name.value,
+      email: email.value,
+      message: message.value
+    })
   });
 
   const result = await res.json();
