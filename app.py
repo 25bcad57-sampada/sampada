@@ -16,7 +16,7 @@ try:
         user=os.getenv("MYSQLUSER"),
         password=os.getenv("MYSQLPASSWORD"),
         database=os.getenv("MYSQLDATABASE"),
-        port=int(os.getenv("MYSQLPORT", 3306))
+        port=int(os.getenv("MYSQLPORT", 49490))
     )
     cursor = conn.cursor()
     print("✅ MySQL Connected")
@@ -54,4 +54,6 @@ def contact():
         print("❌ ERROR:", e)
         return jsonify({"message": str(e)})
 
-# NO app.run here
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
